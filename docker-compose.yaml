@@ -1,0 +1,15 @@
+version: "3"
+
+services:
+  app:
+    build: .
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: go run main.go
+    container_name: covidform
+    restart: on-failure
+    ports:
+      - 8080:8080
+    env_file:
+      - .env
