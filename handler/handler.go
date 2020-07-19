@@ -1,27 +1,41 @@
 package handler
 
 import (
-	httptransport "github.com/go-kit/kit/transport/http"
-	"github.com/nongdenchet/covidform/endpoint"
-	"github.com/nongdenchet/covidform/helpers"
-	"github.com/nongdenchet/covidform/middleware"
+	"encoding/json"
+	"net/http"
+
 	"github.com/nongdenchet/covidform/repository"
+
+	"github.com/jinzhu/gorm"
 	"github.com/nongdenchet/covidform/service"
 )
 
-func NewHandler() *httptransport.Server {
-	repo := repository.IdenticonRepoImpl{}
+func respondWithError(w http.ResponseWriter, code int, message string) {
+	respondWithJSON(w, code, map[string]string{"status": "failed", "error": message})
+}
 
-	var s endpoint.IdenticontService
-	{
-		s = service.IdenticonServiceImpl{Repo: repo}
-		s = middleware.NewLoggingMiddleware(s)
-		s = middleware.NewIntrumentationMiddleware(s)
+func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
+	response, _ := json.Marshal(payload)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	w.Write(response)
+}
+
+type Handler interface {
+	RegisterHandler(w http.ResponseWriter, r *http.Request)
+	LoginHandler(w http.ResponseWriter, r *http.Request)
+	WelcomeHandler(w http.ResponseWriter, r *http.Request)
+}
+
+type handlerImpl struct {
+	venueService service.VenueService
+}
+
+func NewHandler(db *gorm.DB) Handler {
+	venueRepo := repository.NewVenueRepo(db)
+
+	return handlerImpl{
+		venueService: service.NewVenueService(venueRepo),
 	}
-
-	return httptransport.NewServer(
-		endpoint.MakeGenerateEndpoint(s),
-		helpers.DecodeGenerateRequest,
-		helpers.EncodeResponse,
-	)
 }
