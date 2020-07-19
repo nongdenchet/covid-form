@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/nongdenchet/covidform/repository"
 
@@ -17,7 +18,7 @@ import (
 
 func main() {
 	// Database
-	db, err := gorm.Open("mysql", "quan:developer@/covid_form?charset=utf8&parseTime=True&loc=Local")
+	db, err := gorm.Open("mysql", os.Getenv("DB_URI"))
 	db.LogMode(true)
 	if err != nil {
 		panic(err)
@@ -47,5 +48,5 @@ func main() {
 
 	// Start server
 	http.Handle("/", router)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), nil))
 }
