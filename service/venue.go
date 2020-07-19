@@ -71,14 +71,14 @@ type RegisterResponse struct {
 }
 
 func (s venueServiceImpl) Register(r RegisterRequest) (*RegisterResponse, error) {
-	if r.Password != r.Confirm {
-		return nil, utils.NewUserError("Password mismatch")
-	}
 	if len(r.Username) < 3 {
 		return nil, utils.NewUserError("Username must be at least 3 characters")
 	}
 	if len(r.Password) < 6 {
 		return nil, utils.NewUserError("Password must be at least 6 characters")
+	}
+	if r.Password != r.Confirm {
+		return nil, utils.NewUserError("Password mismatch")
 	}
 
 	current, err := s.Repo.GetByUsername(r.Username)
