@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/nongdenchet/covidform/repository"
+
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -31,6 +33,7 @@ func main() {
 	// Handlers
 	h := handler.NewHandler(db)
 	router := mux.NewRouter()
+	am := handler.AuthenMiddleware{Repo: repository.NewVenueRepo(db)}
 
 	// Non authen api
 	nonAuthen := router.PathPrefix(utils.ApiV1).Subrouter()
@@ -39,7 +42,7 @@ func main() {
 
 	// Authen api
 	authen := router.PathPrefix(utils.ApiV1).Subrouter()
-	authen.Use(handler.AuthenMiddleware)
+	authen.Use(am.Handler)
 	authen.HandleFunc("/welcome", h.WelcomeHandler).Methods("POST")
 
 	// Start server
