@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/nongdenchet/covidform/repository"
 
@@ -17,9 +18,14 @@ import (
 )
 
 func main() {
+	isDebug, err := strconv.ParseBool(os.Getenv("DEBUG"))
+	if err != nil {
+		panic(err)
+	}
+
 	// Database
 	db, err := gorm.Open("mysql", os.Getenv("DB_URI"))
-	db.LogMode(true)
+	db.LogMode(isDebug)
 	if err != nil {
 		panic(err)
 	}
@@ -39,12 +45,13 @@ func main() {
 	// Non authen api
 	nonAuthen := router.PathPrefix(utils.ApiV1).Subrouter()
 	nonAuthen.HandleFunc("/venues", h.RegisterHandler).Methods("POST")
+	nonAuthen.HandleFunc("/venues/{id}", h.GetVenueHandler).Methods("GET")
 	nonAuthen.HandleFunc("/sessions", h.LoginHandler).Methods("POST")
 
 	// Authen api
 	authen := router.PathPrefix(utils.ApiV1).Subrouter()
 	authen.Use(am.Handler)
-	authen.HandleFunc("/welcome", h.WelcomeHandler).Methods("POST")
+	authen.HandleFunc("/venues/self", h.UpdateVenueHandler).Methods("PATCH")
 
 	// Start server
 	http.Handle("/", router)

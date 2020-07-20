@@ -24,8 +24,9 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 
 type Handler interface {
 	RegisterHandler(w http.ResponseWriter, r *http.Request)
+	GetVenueHandler(w http.ResponseWriter, r *http.Request)
 	LoginHandler(w http.ResponseWriter, r *http.Request)
-	WelcomeHandler(w http.ResponseWriter, r *http.Request)
+	UpdateVenueHandler(w http.ResponseWriter, r *http.Request)
 }
 
 type handlerImpl struct {

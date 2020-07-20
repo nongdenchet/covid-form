@@ -11,3 +11,15 @@ type UserError struct {
 func (e UserError) Error() string {
 	return e.message
 }
+
+type NotFoundError struct {
+	message string
+}
+
+func NewNotFoundError(message string) error {
+	return NotFoundError{message}
+}
+
+func (e NotFoundError) Error() string {
+	return e.message
+}
