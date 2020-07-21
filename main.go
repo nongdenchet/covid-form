@@ -36,6 +36,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	err = db.AutoMigrate(&model.Visit{}).Error
+	if err != nil {
+		panic(err)
+	}
 
 	// Handlers
 	h := handler.NewHandler(db)
@@ -45,13 +49,15 @@ func main() {
 	// Non authen api
 	nonAuthen := router.PathPrefix(utils.ApiV1).Subrouter()
 	nonAuthen.HandleFunc("/venues", h.RegisterHandler).Methods("POST")
-	nonAuthen.HandleFunc("/venues/{id}", h.GetVenueHandler).Methods("GET")
 	nonAuthen.HandleFunc("/sessions", h.LoginHandler).Methods("POST")
+	nonAuthen.HandleFunc("/venues/{id}", h.GetVenueHandler).Methods("GET")
+	nonAuthen.HandleFunc("/venues/{id}/visits", h.SubmitFormHandler).Methods("POST")
 
 	// Authen api
 	authen := router.PathPrefix(utils.ApiV1).Subrouter()
 	authen.Use(am.Handler)
 	authen.HandleFunc("/venues/self", h.UpdateVenueHandler).Methods("PATCH")
+	authen.HandleFunc("/venues/self/visits", h.GetVisitsByVenueHandler).Methods("GET")
 
 	// Start server
 	http.Handle("/", router)

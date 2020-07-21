@@ -27,16 +27,21 @@ type Handler interface {
 	GetVenueHandler(w http.ResponseWriter, r *http.Request)
 	LoginHandler(w http.ResponseWriter, r *http.Request)
 	UpdateVenueHandler(w http.ResponseWriter, r *http.Request)
+	SubmitFormHandler(w http.ResponseWriter, r *http.Request)
+	GetVisitsByVenueHandler(w http.ResponseWriter, r *http.Request)
 }
 
 type handlerImpl struct {
 	venueService service.VenueService
+	visitService service.VisitService
 }
 
 func NewHandler(db *gorm.DB) Handler {
 	venueRepo := repository.NewVenueRepo(db)
+	visitRepo := repository.NewVisitRepo(db)
 
 	return handlerImpl{
 		venueService: service.NewVenueService(venueRepo),
+		visitService: service.NewVisitService(visitRepo),
 	}
 }
