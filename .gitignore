@@ -3,3 +3,4 @@ vendor/*
 .env
 .prod
 .stag
+documents/*
